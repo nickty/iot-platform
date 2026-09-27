@@ -1,0 +1,184 @@
+services:
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    container_name: iot-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=2
+      - --memory=2G
+      - --overprovisioned
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092,OUTSIDE://localhost:19092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=redpanda:33145
+      - --mode=dev-container
+    ports:
+      - "19092:19092"   # Kafka API (external)
+      - "9644:9644"     # Admin API
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - iot-net
+
+  redpanda-console:
+    image: redpandadata/console:v2.7.2
+    container_name: iot-redpanda-console
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+    networks:
+      - iot-net
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: iot-timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: iot
+      POSTGRES_PASSWORD: iot_dev_password
+      POSTGRES_DB: iot
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+      - ../config/timescale/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iot -d iot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iot-net    
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: iot-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - iot-net    
+
+
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: iot-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: us-east-1
+    volumes:
+      - localstack-data:/var/lib/localstack
+    networks:
+      - iot-net
+
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: iot-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - iot-net    
+
+
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: iot-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - iot-net
+
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: iot-jaeger
+    ports:
+      - "16686:16686"   # Web UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - iot-net    
+
+
+
+  loki:
+    image: grafana/loki:3.2.0
+    container_name: iot-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ../config/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - iot-net
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    container_name: iot-otel-collector
+    ports:
+      - "4319:4317"   # OTLP gRPC (avoid clash with Jaeger's 4317)
+      - "4320:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus exporter
+    volumes:
+      - ../config/otel/otel-config.yml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    networks:
+      - iot-net
+
+volumes:
+  redpanda-data:
+  timescale-data:
+  redis-data:
+  localstack-data:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+
+networks:
+  iot-net:
+    driver: bridge

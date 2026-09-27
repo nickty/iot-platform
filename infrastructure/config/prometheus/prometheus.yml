@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: iot-local
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: otel-collector
+    static_configs:
+      - targets: ['otel-collector:8889']
+
+  # Our Node.js services will be added here later
+  # - job_name: iot-services
+  #   static_configs:
+  #     - targets: ['ingest-http:3000', 'processor-realtime:3000']
