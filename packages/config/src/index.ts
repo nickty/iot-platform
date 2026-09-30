@@ -39,6 +39,23 @@ const ConfigSchema = z.object({
 
   // API
   API_PORT: z.coerce.number().default(3000),
+
+    // Ingest HTTP
+  INGEST_HTTP_PORT: z.coerce.number().default(3001),
+  INGEST_HTTP_HOST: z.string().default('0.0.0.0'),
+  INGEST_API_KEY_HEADER: z.string().default('x-api-key'),
+
+  // Ingest MQTT
+  MQTT_TCP_PORT: z.coerce.number().default(1883),
+  MQTT_WS_PORT: z.coerce.number().default(8883),
+  MQTT_HOST: z.string().default('0.0.0.0'),
+
+  // Rate limiting
+  RATE_LIMIT_MAX: z.coerce.number().default(1000),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+
+  // API keys (comma-separated list for dev)
+  DEVICE_API_KEYS: z.string().default('dev-key-1,dev-key-2,dev-key-3'),
 });
 
 export type AppConfig = z.infer<typeof ConfigSchema>;

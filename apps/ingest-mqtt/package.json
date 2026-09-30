@@ -1,5 +1,5 @@
 {
-  "name": "@iot/device-simulator",
+  "name": "@iot/ingest-mqtt",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,12 +13,13 @@
     "@iot/config": "workspace:*",
     "@iot/contracts": "workspace:*",
     "@iot/observability": "workspace:*",
+    "aedes": "^0.51.3",
+    "ioredis": "^5.4.1",
     "kafkajs": "^2.2.4",
-    "mqtt": "^5.10.1",
-    "uuid": "^10.0.0"
+    "uuid": "^11.0.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^22.7.5",
-    "@types/uuid": "^10.0.0"
+    "@types/node": "^22.7.5"
   }
 }

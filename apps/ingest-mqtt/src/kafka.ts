@@ -11,12 +11,9 @@ export async function getProducer(): Promise<Producer> {
   const logger = getLogger();
 
   const kafka = new Kafka({
-    clientId: `${config.KAFKA_CLIENT_ID}-simulator`,
+    clientId: `${config.KAFKA_CLIENT_ID}-ingest-mqtt`,
     brokers: config.KAFKA_BROKERS.split(','),
-    retry: {
-      initialRetryTime: 300,
-      retries: 10,
-    },
+    retry: { initialRetryTime: 300, retries: 10 },
   });
 
   producer = kafka.producer({
@@ -26,7 +23,7 @@ export async function getProducer(): Promise<Producer> {
   });
 
   await producer.connect();
-  logger.info({ brokers: config.KAFKA_BROKERS }, 'Kafka producer connected');
+  logger.info({ brokers: config.KAFKA_BROKERS }, 'Kafka producer connected (mqtt)');
   return producer;
 }
 
