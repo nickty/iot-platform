@@ -13,7 +13,17 @@ scrape_configs:
     static_configs:
       - targets: ['otel-collector:8889']
 
-  # Our Node.js services will be added here later
-  # - job_name: iot-services
+  - job_name: ingest-http
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+    metrics_path: /metrics
+
+  - job_name: processor-realtime
+    static_configs:
+      - targets: ['host.docker.internal:3002']
+    metrics_path: /metrics
+
+  # Add these on Day 6 when services come online:
+  # - job_name: api-rest
   #   static_configs:
-  #     - targets: ['ingest-http:3000', 'processor-realtime:3000']
+  #     - targets: ['host.docker.internal:3003']

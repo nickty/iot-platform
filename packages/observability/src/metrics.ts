@@ -78,3 +78,15 @@ export const processorDlqTotal = new Counter({
 });
 
 
+export const wsConnectionsActive = new Gauge({
+  name: 'websocket_connections_active',
+  help: 'Active WebSocket connections',
+  registers: [getMetricsRegistry()],
+});
+
+export const wsMessagesSent = new Counter({
+  name: 'websocket_messages_sent_total',
+  help: 'WebSocket messages sent',
+  labelNames: ['type'] as const,
+  registers: [getMetricsRegistry()],
+});

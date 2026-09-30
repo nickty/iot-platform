@@ -1,9 +1,11 @@
+import { startMetricsServer, stopMetricsServer } from './plugins/metrics-server.js';
 import Redis from 'ioredis';
 import { getConfig } from '@iot/config';
 import { getLogger, startTracing } from '@iot/observability';
 import { ConsumerGroups, Topics } from '@iot/contracts';
 import { getProducer, createConsumer, runConsumer, disconnectAll } from './kafka.js';
 import { handleMessage } from './handler.js';
+
 
 async function main(): Promise<void> {
   startTracing();
@@ -32,11 +34,14 @@ async function main(): Promise<void> {
 
   // 4. Start consuming
   await runConsumer(consumer, (payload) => handleMessage({ redis, producer }, payload));
+  // Start metrics HTTP server
+  startMetricsServer(3002);
   logger.info('processor-realtime ready');
 
   // Graceful shutdown
   const shutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, 'Shutting down processor-realtime');
+    stopMetricsServer();
     await disconnectAll();
     await redis.quit();
     process.exit(0);
