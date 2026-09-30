@@ -20,3 +20,18 @@ export const ConsumerGroups = {
 } as const;
 
 export type ConsumerGroup = (typeof ConsumerGroups)[keyof typeof ConsumerGroups];
+
+
+/**
+ * Redis key patterns — centralized so all services agree.
+ */
+export const RedisKeys = {
+  deviceLatest: (deviceId: string) => `device:${deviceId}:latest`,
+  processedEvent: (eventId: string) => `processed:event:${eventId}`,
+  alertCooldown: (deviceId: string, ruleId: string) => `alert:cooldown:${deviceId}:${ruleId}`,
+} as const;
+
+export const RedisChannels = {
+  telemetryLive: 'telemetry:live',
+  alertsLive: 'alerts:live',
+} as const;

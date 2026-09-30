@@ -37,3 +37,20 @@ export const AlertSchema = z.object({
 });
 
 export type Alert = z.infer<typeof AlertSchema>;
+
+
+/**
+ * Alert rule — defines a threshold on a metric.
+ * In production, rules come from a DB. For dev, they're hardcoded.
+ */
+export const AlertRuleSchema = z.object({
+  ruleId: z.string(),
+  deviceIdPattern: z.string(),      // exact ID or '*' for all
+  metric: z.string(),
+  operator: z.enum(['>', '<', '>=', '<=']),
+  threshold: z.number(),
+  severity: z.enum(['info', 'warning', 'critical']),
+  message: z.string(),
+});
+
+export type AlertRule = z.infer<typeof AlertRuleSchema>;
