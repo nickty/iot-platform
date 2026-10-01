@@ -1,13 +1,9 @@
 import type Redis from 'ioredis';
 
-const WINDOW_SIZE = 100;           // rolling window of samples
-const Z_THRESHOLD = 3.0;           // |z| > 3 is an anomaly
-const MIN_SAMPLES = 20;            // need at least this many to detect
+const WINDOW_SIZE = 100;
+const Z_THRESHOLD = 3.0;
+const MIN_SAMPLES = 20;
 
-/**
- * Track rolling statistics for a device/metric combination.
- * Uses Redis sorted sets for the rolling window (score = timestamp).
- */
 export async function detectAnomaly(
   redis: Redis,
   deviceId: string,
@@ -29,10 +25,10 @@ export async function detectAnomaly(
   // Get all values in the window
   const entries = await redis.zrange(key, 0, -1);
   if (entries.length < MIN_SAMPLES) {
-    return null; // not enough data yet
+    return null;
   }
 
-  // Extract numeric values from "timestamp:value" format
+  // Extract numeric values
   const values = entries.map((e) => {
     const parts = e.split(':');
     return parseFloat(parts[1] ?? '0');
@@ -45,7 +41,7 @@ export async function detectAnomaly(
   const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
   const stdDev = Math.sqrt(variance);
 
-  // Avoid division by zero (constant signal)
+  // Avoid division by zero
   if (stdDev === 0) {
     return { isAnomaly: false, zScore: 0, mean, stdDev: 0 };
   }
