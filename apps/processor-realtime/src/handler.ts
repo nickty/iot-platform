@@ -17,6 +17,8 @@ import {
 } from '@iot/observability';
 import { evaluateRules } from './rules.js';
 import { markProcessed, updateLatestState, publishLive } from './state.js';
+import { detectAnomaly } from './anomaly.js';
+import { processorAnomaliesDetectedTotal } from '@iot/observability';
 
 export interface HandlerDeps {
   redis: Redis;
@@ -104,6 +106,31 @@ export async function handleMessage(
     await publishLive(redis, RedisChannels.alertsLive, alert);
     processorAlertsFiredTotal.inc({ severity: rule.severity });
     logger.warn({ alert }, 'Alert fired');
+  }
+    // ── Step 5b: Anomaly detection (Z-score) ───────────────────────
+  for (const [metric, value] of Object.entries(event.metrics)) {
+    const result = await detectAnomaly(redis, event.deviceId, metric, value);
+    if (result?.isAnomaly) {
+      const alert = {
+        alertId: uuidv7(),
+        deviceId: event.deviceId,
+        ruleId: `anomaly-${metric}`,
+        severity: 'warning' as const,
+        message: `Anomaly detected in ${metric}: value=${value.toFixed(2)}, z-score=${result.zScore.toFixed(2)}`,
+        value,
+        threshold: result.mean + 3 * result.stdDev,
+        triggeredAt: new Date().toISOString(),
+      };
+
+      await producer.send({
+        topic: Topics.TELEMETRY_ALERTS,
+        messages: [{ key: event.deviceId, value: JSON.stringify(alert) }],
+      });
+
+      await publishLive(redis, RedisChannels.alertsLive, alert);
+      processorAnomaliesDetectedTotal.inc({ metric });
+      logger.warn({ alert, zScore: result.zScore }, 'Anomaly detected');
+    }
   }
 
   // ── Step 6: Publish to Redis Pub/Sub for WebSocket fan-out ──────

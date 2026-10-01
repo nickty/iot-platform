@@ -184,3 +184,10 @@ export const silverTransformDuration = new Histogram({
   buckets: [0.5, 1, 2, 5, 10, 30, 60],
   registers: [getMetricsRegistry()],
 });
+
+export const processorAnomaliesDetectedTotal = new Counter({
+  name: 'processor_anomalies_detected_total',
+  help: 'Anomalies detected by Z-score',
+  labelNames: ['metric'] as const,
+  registers: [getMetricsRegistry()],
+});

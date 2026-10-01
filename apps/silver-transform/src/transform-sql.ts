@@ -70,6 +70,21 @@ export function buildSilverTransformSql(
           WHEN temperature < 40 THEN 'high'
           ELSE 'critical'
         END AS temp_category,
+         -- Geo enrichment: derive region from lat/lon
+        CASE
+          WHEN lon IS NULL OR lat IS NULL THEN 'unknown'
+          WHEN lat > 60 THEN 'arctic'
+          WHEN lat < -60 THEN 'antarctic'
+          WHEN lat >= 23.5 AND lat <= 66.5 THEN 'northern-temperate'
+          WHEN lat <= -23.5 AND lat >= -66.5 THEN 'southern-temperate'
+          ELSE 'tropical'
+        END AS climate_zone,
+        -- Hemisphere
+        CASE
+          WHEN lat > 0 THEN 'northern'
+          WHEN lat < 0 THEN 'southern'
+          ELSE 'equatorial'
+        END AS hemisphere,
         temperature >= 30 AS is_high_temp,
         humidity < 20 AS is_low_humidity,
         pressure < 1000 AS is_low_pressure

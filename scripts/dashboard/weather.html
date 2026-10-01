@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real-Time Weather</title>
+  <style>
+    body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    .city { color: #58a6ff; font-size: 18px; font-weight: bold; }
+    .temp { font-size: 36px; color: #e6edf3; }
+    .metric { color: #8b949e; font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🌍 Real-Time Weather (Open-Meteo)</h1>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    async function load() {
+      const res = await fetch('http://localhost:3003/devices');
+      const data = await res.json();
+
+      const weatherDevices = data.devices.filter(d => d.deviceId.startsWith('weather-'));
+
+      document.getElementById('grid').innerHTML = weatherDevices.map(d => `
+        <div class="card">
+          <div class="city">${d.tags?.city || d.deviceId}</div>
+          <div class="temp">${(d.metrics.temperature ?? 0).toFixed(1)}°C</div>
+          <div class="metric">
+            ${d.tags?.condition || 'Unknown'} · Humidity: ${d.metrics.humidity ?? 0}% · Wind: ${(d.metrics.wind_speed ?? 0).toFixed(1)} km/h
+          </div>
+          <div class="metric">Region: ${d.tags?.region || 'unknown'} · ${d.timestamp}</div>
+        </div>
+      `).join('');
+    }
+
+    load();
+    setInterval(load, 30000);
+  </script>
+</body>
+</html>
