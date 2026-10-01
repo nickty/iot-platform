@@ -27,6 +27,11 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:3005']
 
+
+  - job_name: archive-consumer
+    static_configs:
+      - targets: ['host.docker.internal:3006']
+
   # Add these on Day 6 when services come online:
   # - job_name: api-rest
   #   static_configs:

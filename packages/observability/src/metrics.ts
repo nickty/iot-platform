@@ -119,3 +119,36 @@ export const kafkaConsumerLag = new Gauge({
   labelNames: ['group', 'topic', 'partition'] as const,
   registers: [getMetricsRegistry()],
 });
+
+
+export const archiveEventsBufferedTotal = new Counter({
+  name: 'archive_events_buffered_total',
+  help: 'Events buffered by archive consumer',
+  registers: [getMetricsRegistry()],
+});
+
+export const archiveFilesWrittenTotal = new Counter({
+  name: 'archive_files_written_total',
+  help: 'Parquet files written to S3',
+  labelNames: ['zone'] as const,
+  registers: [getMetricsRegistry()],
+});
+
+export const archiveBytesWrittenTotal = new Counter({
+  name: 'archive_bytes_written_total',
+  help: 'Total bytes written to S3',
+  registers: [getMetricsRegistry()],
+});
+
+export const archiveFlushDuration = new Histogram({
+  name: 'archive_flush_duration_seconds',
+  help: 'Time to write a Parquet file to S3',
+  buckets: [0.1, 0.5, 1, 2, 5, 10],
+  registers: [getMetricsRegistry()],
+});
+
+export const archiveBufferSize = new Gauge({
+  name: 'archive_buffer_size',
+  help: 'Current number of events in memory buffer',
+  registers: [getMetricsRegistry()],
+});
