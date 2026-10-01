@@ -90,3 +90,32 @@ export const wsMessagesSent = new Counter({
   labelNames: ['type'] as const,
   registers: [getMetricsRegistry()],
 });
+
+
+export const batchEventsInsertedTotal = new Counter({
+  name: 'batch_events_inserted_total',
+  help: 'Events inserted into TimescaleDB',
+  registers: [getMetricsRegistry()],
+});
+
+export const batchEventsInvalidTotal = new Counter({
+  name: 'batch_events_invalid_total',
+  help: 'Events rejected by batch processor',
+  labelNames: ['reason'] as const,
+  registers: [getMetricsRegistry()],
+});
+
+export const batchFlushDuration = new Histogram({
+  name: 'batch_flush_duration_seconds',
+  help: 'Time to buffer (not insert) an event',
+  buckets: [0.0001, 0.0005, 0.001, 0.005, 0.01],
+  registers: [getMetricsRegistry()],
+});
+
+
+export const kafkaConsumerLag = new Gauge({
+  name: 'kafka_consumer_lag',
+  help: 'Kafka consumer group lag (messages behind the latest offset)',
+  labelNames: ['group', 'topic', 'partition'] as const,
+  registers: [getMetricsRegistry()],
+});

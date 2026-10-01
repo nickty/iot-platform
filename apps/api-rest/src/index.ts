@@ -4,6 +4,7 @@ import { getLogger, startTracing } from '@iot/observability';
 import { deviceRoutes } from './routes/devices.js';
 import { healthRoutes } from './routes/health.js';
 import { getRedis, closeRedis } from './redis-client.js';
+import { getDb, closeDb } from './db.js';
 
 async function main(): Promise<void> {
   startTracing();
@@ -17,6 +18,10 @@ async function main(): Promise<void> {
 
   // Warm up Redis before accepting traffic
   await getRedis().ping();
+
+   // Warm up DB connection
+  await getDb()`SELECT 1`;
+  logger.info('DB connection verified');
 
   await app.register(healthRoutes);
   await app.register(deviceRoutes);
@@ -32,6 +37,7 @@ async function main(): Promise<void> {
     logger.info({ signal }, 'Shutting down api-rest');
     await app.close();
     await closeRedis();
+    await closeDb();
     process.exit(0);
   };
   process.on('SIGINT', () => void shutdown('SIGINT'));

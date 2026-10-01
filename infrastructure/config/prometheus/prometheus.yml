@@ -23,6 +23,10 @@ scrape_configs:
       - targets: ['host.docker.internal:3002']
     metrics_path: /metrics
 
+  - job_name: processor-batch
+    static_configs:
+      - targets: ['host.docker.internal:3005']
+
   # Add these on Day 6 when services come online:
   # - job_name: api-rest
   #   static_configs:

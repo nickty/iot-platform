@@ -38,6 +38,9 @@ importers:
       ioredis:
         specifier: ^5.4.1
         version: 5.11.1
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.9
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -156,6 +159,31 @@ importers:
       uuid:
         specifier: ^11.0.3
         version: 11.1.1
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.5
+        version: 22.20.4
+
+  apps/processor-batch:
+    dependencies:
+      '@iot/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@iot/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@iot/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      kafkajs:
+        specifier: ^2.2.4
+        version: 2.2.4
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.9
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -1710,6 +1738,10 @@ packages:
   postgres-interval@1.2.0:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
+
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
+    engines: {node: '>=12'}
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -3649,6 +3681,8 @@ snapshots:
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
+
+  postgres@3.4.9: {}
 
   process-nextick-args@2.0.1: {}
 
