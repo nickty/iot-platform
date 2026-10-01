@@ -251,6 +251,28 @@ importers:
         specifier: ^22.7.5
         version: 22.20.4
 
+  apps/silver-transform:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.685.0
+        version: 3.1144.0
+      '@iot/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@iot/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@iot/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.5
+        version: 22.20.4
+
   packages/config:
     dependencies:
       dotenv:

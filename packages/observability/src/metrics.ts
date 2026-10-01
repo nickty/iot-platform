@@ -152,3 +152,35 @@ export const archiveBufferSize = new Gauge({
   help: 'Current number of events in memory buffer',
   registers: [getMetricsRegistry()],
 });
+
+
+export const silverFilesProcessedTotal = new Counter({
+  name: 'silver_files_processed_total',
+  help: 'Bronze files processed into Silver',
+  registers: [getMetricsRegistry()],
+});
+
+export const silverEventsInTotal = new Counter({
+  name: 'silver_events_in_total',
+  help: 'Events read from Bronze',
+  registers: [getMetricsRegistry()],
+});
+
+export const silverEventsOutTotal = new Counter({
+  name: 'silver_events_out_total',
+  help: 'Events written to Silver',
+  registers: [getMetricsRegistry()],
+});
+
+export const silverDuplicatesRemovedTotal = new Counter({
+  name: 'silver_duplicates_removed_total',
+  help: 'Duplicate events removed during transform',
+  registers: [getMetricsRegistry()],
+});
+
+export const silverTransformDuration = new Histogram({
+  name: 'silver_transform_duration_seconds',
+  help: 'Time to complete a full Silver transform',
+  buckets: [0.5, 1, 2, 5, 10, 30, 60],
+  registers: [getMetricsRegistry()],
+});
